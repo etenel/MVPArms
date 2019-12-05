@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jess.arms.integration.lifecycle;
+package com.jess.arms.mvp;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-import com.jess.arms.utils.RxLifecycleUtils;
-import com.trello.rxlifecycle2.RxLifecycle;
-
-import io.reactivex.subjects.Subject;
 
 /**
  * ================================================
- * 让 {@link Activity}/{@link Fragment} 实现此接口,即可正常使用 {@link RxLifecycle}
- * 无需再继承 {@link RxLifecycle} 提供的 Activity/Fragment ,扩展性极强
+ * 框架要求框架中的每个 Presenter 都需要实现此类,以满足规范
  *
- * @see RxLifecycleUtils 详细用法请查看此类
- * Created by JessYan on 25/08/2017 18:39
+ * @see BasePresenter
+ * @see <a href="https://github.com/JessYanCoding/MVPArms/wiki#2.4.4">Presenter wiki 官方文档</a>
+ * Created by JessYan on 4/28/2016
  * <a href="mailto:jess.yan.effort@gmail.com">Contact me</a>
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public interface Lifecycleable<E> {
-    @NonNull
-    Subject<E> provideLifecycleSubject();
+public interface IViewModel {
+
+    /**
+     * 做一些初始化操作
+     */
+    void onStart();
+
+    /**
+     * 在框架中 {@link Activity#onDestroy()} 时会默认调用 {@link IViewModel#onDestroy()}
+     */
+    void onDestroy();
 }
