@@ -81,6 +81,11 @@ public abstract class BaseFragment<P extends IPresenter> extends Fragment implem
         mContext = context;
     }
 
+    @Override
+    public int initView() {
+        return 0;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

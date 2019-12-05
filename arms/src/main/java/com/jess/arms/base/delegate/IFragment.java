@@ -79,6 +79,11 @@ public interface IFragment {
      * @return
      */
     View initView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
+    /**
+     * 初始化 View
+     * @return
+     */
+    int initView();
 
     /**
      * 初始化数据

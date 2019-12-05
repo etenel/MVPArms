@@ -8,11 +8,11 @@ if (project.rootProject.findProject('local.properties') != null){
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 }
 
-def gitUrl = 'https://github.com/JessYanCoding/MVPArms.git'   // Git仓库的url
-def siteUrl = 'https://github.com/JessYanCoding/MVPArms'   // 项目的主页
+def gitUrl = 'https://github.com/etenel/MVPArms.git'   // Git仓库的url
+def siteUrl = 'https://github.com/etenel/MVPArms'   // 项目的主页
 
 version = rootProject.ext.android["versionName"]
-group = "me.jessyan"
+group = "me.jessyan.etenel"
 
 
 bintray {
@@ -29,7 +29,7 @@ bintray {
 
         version {
             name = rootProject.ext.android["versionName"]
-            desc = 'A common Architecture for Android Applications developing based on MVP，integrates many Open Source Projects( like Dagger2,RxJava,Retrofit... ),to make your developing quicker and easier.'
+            desc = 'MvpArms，修改成AndroidX,添加了Google的ViewModel,可以使用mvp，也可以使用mvvm'
             released = new Date()
             vcsTag = 'v' + rootProject.ext.android["versionName"]
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
@@ -48,7 +48,7 @@ install {
                 packaging 'aar'
                 // Add your description here
                 name POM_NAME
-                description 'A common Architecture for Android Applications developing based on MVP，integrates many Open Source Projects( like Dagger2,RxJava,Retrofit... ),to make your developing quicker and easier.'
+                description 'MvpArms，修改成AndroidX,添加了Google的ViewModel,可以使用mvp，也可以使用mvvm'
                 url siteUrl
                 // Set your license
                 licenses {
@@ -59,9 +59,9 @@ install {
                 }
                 developers {
                     developer {
-                        id 'JessYanCoding'        //填写bintray或者github的用户名
-                        name 'jessyan'         //姓名，可以是中文
-                        email 'jess.yan.effort@gmail.com'
+                        id 'etenel'        //填写bintray或者github的用户名
+                        name 'etenel'         //姓名，可以是中文
+                        email 'love95869@gmail.com'
                     }
                 }
                 scm {

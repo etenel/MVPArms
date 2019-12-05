@@ -88,7 +88,7 @@ public abstract class BaseVMFragment<V extends ViewDataBinding,VM extends BaseVi
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        int layoutRes = initView(savedInstanceState);
+        int layoutRes = initView();
         if(layoutRes!=0) {
             binding = DataBindingUtil.inflate(inflater, layoutRes, container, false);
             viewModelId=initVariableId();
