@@ -22,15 +22,22 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ComponentActivity;
+import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import com.jess.arms.base.BaseVMActivity;
 import com.jess.arms.integration.EventBusManager;
+import com.jess.arms.integration.SingleLiveEvent;
 import com.jess.arms.utils.Preconditions;
 import com.trello.rxlifecycle2.RxLifecycle;
+
+import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -45,56 +52,67 @@ import io.reactivex.disposables.Disposable;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class BaseViewModel<M extends IModel, V extends IView> extends AndroidViewModel implements IViewModel, LifecycleObserver {
+public class BaseViewModel<M extends IModel> extends AndroidViewModel implements IViewModel {
     protected final String TAG = this.getClass().getSimpleName();
     protected CompositeDisposable mCompositeDisposable;
     protected M mModel;
-    protected V mRootView;
+    private UIChangeLiveData uiChangeLiveData;
 
     /**
      * 如果当前页面同时需要 Model 层和 View 层,则使用此构造函数(默认)
      *
      * @param model
-     * @param rootView
      */
-    public BaseViewModel(@NonNull Application application, M model, V rootView) {
+    public BaseViewModel(@NonNull Application application, M model) {
         super(application);
         Preconditions.checkNotNull(model, "%s cannot be null", IModel.class.getName());
-        Preconditions.checkNotNull(rootView, "%s cannot be null", IView.class.getName());
         this.mModel = model;
-        this.mRootView = rootView;
         onStart();
 
     }
 
     /**
      * 如果当前页面不需要操作数据,只需要 View 层,则使用此构造函数
-     *
-     * @param rootView
      */
-    public BaseViewModel(@NonNull Application application, V rootView) {
-        super(application);
-        Preconditions.checkNotNull(rootView, "%s cannot be null", IView.class.getName());
-        this.mRootView = rootView;
-        onStart();
-    }
-
     public BaseViewModel(@NonNull Application application) {
         super(application);
         onStart();
     }
 
     @Override
+    public void onAny(LifecycleOwner owner, Lifecycle.Event event) {
+
+    }
+
+    @Override
+    public void onCreate() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+    }
+    //将 LifecycleObserver 注册给 LifecycleOwner 后 @OnLifecycleEvent 才可以正常使用
+
+    @Override
     public void onStart() {
-        //将 LifecycleObserver 注册给 LifecycleOwner 后 @OnLifecycleEvent 才可以正常使用
-        if (mRootView != null && mRootView instanceof LifecycleOwner) {
-            ((LifecycleOwner) mRootView).getLifecycle().addObserver(this);
-            if (mModel != null && mModel instanceof LifecycleObserver) {
-                ((LifecycleOwner) mRootView).getLifecycle().addObserver((LifecycleObserver) mModel);
-            }
-        }
-        if (useEventBus())//如果要使用 EventBus 请将此方法返回 true
-            EventBusManager.getInstance().register(this);//注册 EventBus
+
+    }
+
+    @Override
+    public void onStop() {
+
+    }
+
+    @Override
+    public void onResume() {
+
+    }
+
+    @Override
+    public void onPause() {
+
     }
 
     @Override
@@ -103,27 +121,13 @@ public class BaseViewModel<M extends IModel, V extends IView> extends AndroidVie
         if (useEventBus())//如果要使用 EventBus 请将此方法返回 true
             EventBusManager.getInstance().unregister(this);//注销 EventBus
         unDispose();//解除订阅
-        if (mModel != null)
+        if (mModel != null) {
             mModel.onDestroy();
+        }
         this.mModel = null;
-        this.mRootView = null;
         this.mCompositeDisposable = null;
     }
 
-    /**
-     * 在框架中 {@link Activity#onDestroy()} ()} 时会默认调用 {@link IViewModel#onDestroy()}
-     */
-    @Override
-    public void onDestroy() {
-//        if (useEventBus())//如果要使用 EventBus 请将此方法返回 true
-//            EventBusManager.getInstance().unregister(this);//注销 EventBus
-//        unDispose();//解除订阅
-//        if (mModel != null)
-//            mModel.onDestroy();
-//        this.mModel = null;
-//        this.mRootView = null;
-//        this.mCompositeDisposable = null;
-    }
 
     /**
      * 只有当 {@code mRootView} 不为 null, 并且 {@code mRootView} 实现了 {@link LifecycleOwner} 时, 此方法才会被调用
@@ -158,7 +162,7 @@ public class BaseViewModel<M extends IModel, V extends IView> extends AndroidVie
 
     /**
      * 将 {@link Disposable} 添加到 {@link CompositeDisposable} 中统一管理
-     * 可在 {@link Activity#onDestroy()} 中使用 {@link #unDispose()} 停止正在执行的 RxJava 任务,避免内存泄漏
+     * 可在 {@link #onDestroy()} 中使用 {@link #unDispose()} 停止正在执行的 RxJava 任务,避免内存泄漏
      * 目前框架已使用 {@link RxLifecycle} 避免内存泄漏,此方法作为备用方案
      *
      * @param disposable
@@ -173,9 +177,64 @@ public class BaseViewModel<M extends IModel, V extends IView> extends AndroidVie
     /**
      * 停止集合中正在执行的 RxJava 任务
      */
-    public void unDispose() {
+    public <VM extends BaseViewModel> void unDispose() {
         if (mCompositeDisposable != null) {
             mCompositeDisposable.clear();//保证 Activity 结束时取消所有正在执行的订阅
         }
+    }
+
+
+    public void injectLifecycle(Lifecycle lifecycle) {
+        if (lifecycle != null) {
+            lifecycle.addObserver((LifecycleObserver) mModel);
+            if (useEventBus())//如果要使用 EventBus 请将此方法返回 true
+                EventBusManager.getInstance().register(this);//注册 EventBus
+        }
+    }
+
+    public final class UIChangeLiveData extends SingleLiveEvent {
+        private SingleLiveEvent<String> showDialogEvent;
+        private SingleLiveEvent<Void> dismissDialogEvent;
+        private SingleLiveEvent<Void> hideRefreshEvent;
+        private SingleLiveEvent<Void> hideLoadMoreEvent;
+        private SingleLiveEvent<Map<String, Object>> startActivityEvent;
+        private SingleLiveEvent<Void> finishEvent;
+        private SingleLiveEvent<Void> onBackPressedEvent;
+        public SingleLiveEvent<String> getShowDialogEvent() {
+            return showDialogEvent = createLiveData(showDialogEvent);
+        }
+
+        public SingleLiveEvent<Void> getDismissDialogEvent() {
+            return dismissDialogEvent = createLiveData(dismissDialogEvent);
+        }
+
+        public SingleLiveEvent<Map<String, Object>> getStartActivityEvent() {
+            return startActivityEvent = createLiveData(startActivityEvent);
+        }
+
+        public SingleLiveEvent<Void> getFinishEvent() {
+            return finishEvent = createLiveData(finishEvent);
+        }
+
+        public SingleLiveEvent<Void> getOnBackPressedEvent() {
+            return onBackPressedEvent = createLiveData(onBackPressedEvent);
+        }
+        private <T> SingleLiveEvent<T> createLiveData(SingleLiveEvent<T> liveData) {
+            if (liveData == null) {
+                liveData = new SingleLiveEvent<>();
+            }
+            return liveData;
+        }
+        @Override
+        public void observe(LifecycleOwner owner, Observer observer) {
+            super.observe(owner, observer);
+        }
+    }
+
+    public UIChangeLiveData getUiChangeLiveData() {
+        if(uiChangeLiveData==null) {
+            uiChangeLiveData=new UIChangeLiveData();
+        }
+        return uiChangeLiveData;
     }
 }

@@ -25,7 +25,7 @@ import com.jess.arms.base.BaseHolder;
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.http.imageloader.ImageLoader;
-import com.jess.arms.http.imageloader.glide.ImageConfigImpl;
+import com.jess.arms.http.imageloader.glide.GlideArms;
 import com.jess.arms.utils.ArmsUtils;
 
 import butterknife.BindView;
@@ -65,12 +65,15 @@ public class UserItemHolder extends BaseHolder<User> {
         mName.setText(data.getLogin());
 
         //itemView 的 Context 就是 Activity, Glide 会自动处理并和该 Activity 的生命周期绑定
-        mImageLoader.loadImage(itemView.getContext(),
-                ImageConfigImpl
-                        .builder()
-                        .url(data.getAvatarUrl())
-                        .imageView(mAvatar)
-                        .build());
+        GlideArms.with(itemView.getContext())
+                .load(data.getAvatarUrl())
+                .into(mAvatar);
+//        mImageLoader.loadImage(itemView.getContext(),
+//                ImageConfigImpl
+//                        .builder()
+//                        .url(data.getAvatarUrl())
+//                        .imageView(mAvatar)
+//                        .build());
     }
 
     /**
@@ -81,9 +84,10 @@ public class UserItemHolder extends BaseHolder<User> {
     protected void onRelease() {
         //只要传入的 Context 为 Activity, Glide 就会自己做好生命周期的管理, 其实在上面的代码中传入的 Context 就是 Activity
         //所以在 onRelease 方法中不做 clear 也是可以的, 但是在这里想展示一下 clear 的用法
-        mImageLoader.clear(mAppComponent.application(), ImageConfigImpl.builder()
-                .imageViews(mAvatar)
-                .build());
+        GlideArms.with(mAppComponent.application()).clear(mAvatar);
+//        mImageLoader.clear(mAppComponent.application(), ImageConfigImpl.builder()
+//                .imageViews(mAvatar)
+//                .build());
         this.mAvatar = null;
         this.mName = null;
         this.mAppComponent = null;

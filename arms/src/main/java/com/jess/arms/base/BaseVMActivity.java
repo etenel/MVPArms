@@ -29,14 +29,19 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.jess.arms.base.delegate.IActivity;
+import com.jess.arms.integration.EventBusManager;
 import com.jess.arms.integration.cache.Cache;
 import com.jess.arms.integration.cache.CacheType;
 import com.jess.arms.integration.lifecycle.ActivityLifecycleable;
 import com.jess.arms.mvp.BaseViewModel;
 import com.jess.arms.utils.ArmsUtils;
 import com.trello.rxlifecycle2.android.ActivityEvent;
+
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -107,7 +112,7 @@ public abstract class BaseVMActivity<V extends ViewDataBinding, VM extends BaseV
             e.printStackTrace();
         }
         viewModelId = initVariableId();
-        // mViewModel = initViewModel();
+//         mViewModel = initViewModel();
 //        if (mViewModel == null) {
 //            Class modelClass;
 //            Type type = getClass().getGenericSuperclass();
@@ -122,9 +127,44 @@ public abstract class BaseVMActivity<V extends ViewDataBinding, VM extends BaseV
         if(viewModelId!=0) {
             binding.setVariable(viewModelId, mViewModel);
         }
+        getLifecycle().addObserver(mViewModel);
+        mViewModel.injectLifecycle(getLifecycle());
         binding.setLifecycleOwner(this);
+        registerUIChangeLiveDataCallBack();
         initData(savedInstanceState);
 
+    }
+
+    private void registerUIChangeLiveDataCallBack() {
+//        //加载对话框显示
+//        mViewModel.getUiChangeLiveData().getShowDialogEvent().observe(this, new Observer<String>() {
+//            @Override
+//            public void onChanged(@Nullable String title) {
+//                showDialog(title);
+//            }
+//        });
+//        //加载对话框消失
+//        mViewModel.getUiChangeLiveData().getDismissDialogEvent().observe(this, new Observer<Void>() {
+//            @Override
+//            public void onChanged(@Nullable Void v) {
+//                dismissDialog();
+//            }
+//        });
+
+        //关闭界面
+        mViewModel.getUiChangeLiveData().getFinishEvent().observe(this, new Observer<Void>() {
+            @Override
+            public void onChanged(@Nullable Void v) {
+                finish();
+            }
+        });
+        //关闭上一层
+        mViewModel.getUiChangeLiveData().getOnBackPressedEvent().observe(this, new Observer<Void>() {
+            @Override
+            public void onChanged(@Nullable Void v) {
+                onBackPressed();
+            }
+        });
     }
 
     /**

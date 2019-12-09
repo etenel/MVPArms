@@ -88,6 +88,8 @@ public class UserActivity extends BaseActivity<UserPresenter> implements UserCon
         initRecyclerView();
         mRecyclerView.setAdapter(mAdapter);
         initPaginate();
+        Intent intent = new Intent(this, DemoActivity.class);
+        startActivity(intent);
     }
 
 

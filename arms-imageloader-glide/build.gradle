@@ -29,4 +29,3 @@ dependencies {
     compileOnly project(':arms')
 }
 
-apply from: '../bintray.gradle'

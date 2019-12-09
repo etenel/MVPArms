@@ -17,6 +17,11 @@ package com.jess.arms.mvp;
 
 import android.app.Activity;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
+
 /**
  * ================================================
  * 框架要求框架中的每个 Presenter 都需要实现此类,以满足规范
@@ -28,15 +33,27 @@ import android.app.Activity;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public interface IViewModel {
+public interface IViewModel extends LifecycleObserver {
+    @OnLifecycleEvent(Lifecycle.Event.ON_ANY)
+    void onAny(LifecycleOwner owner, Lifecycle.Event event);
 
-    /**
-     * 做一些初始化操作
-     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    void onCreate();
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    void onDestroy();
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
     void onStart();
 
-    /**
-     * 在框架中 {@link Activity#onDestroy()} 时会默认调用 {@link IViewModel#onDestroy()}
-     */
-    void onDestroy();
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    void onStop();
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    void onResume();
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    void onPause();
+
+
 }
